@@ -17,8 +17,14 @@ steps:
     goals: 'clean package'
 
 - script: |
-    find . -name "*.war" -exec mv {} ROOT.war \;
-  displayName: Rename WAR to ROOT
+    # Rename the built WAR to ROOT.war (first match only)
+    WAR_FILE=$(find . -name "*.war" | head -n 1)
+    if [ -z "$WAR_FILE" ]; then
+      echo "No WAR file found"
+      exit 1
+    fi
+    cp "$WAR_FILE" ROOT.war
+  displayName: 'Rename WAR to ROOT'
 
 - task: CopyFiles@2
   inputs:
@@ -30,4 +36,3 @@ steps:
     PathtoPublish: '$(Build.ArtifactStagingDirectory)'
     ArtifactName: 'warfile'
     publishLocation: 'Container'
-
